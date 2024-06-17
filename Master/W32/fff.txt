@@ -1,0 +1,10 @@
+if (ManufacturerFilterID > 0)
+                    Result = Result.Where(i => i.Manufacturers.ManufacturerID == ManufacturerFilterID);
+
+                return Result.Take(100);
+
+
+
+
+
+            ManufacturerList.Insert(0, new Manufacturers { ManufacturerName = "Все диапазоны" });

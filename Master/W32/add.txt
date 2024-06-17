@@ -1,0 +1,126 @@
+WindowStartupLocation="CenterScreen"
+        MaxHeight="560" MaxWidth="860"
+        MinHeight="540" MinWidth="840"
+        Title="Добавить услугу" Height="550" Width="850" Icon="/Resources/icon.ico" FontFamily="Arial">
+    <Grid x:Name="AddGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="600"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="37*"/>
+            <RowDefinition Height="37*"/>
+            <RowDefinition Height="37*"/>
+            <RowDefinition Height="37*"/>
+            <RowDefinition Height="37*"/>
+            <RowDefinition Height="33*"/>
+            <RowDefinition Height="66*"/>
+            <RowDefinition Height="185*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="ID" FontFamily="Arial" FontSize="16" VerticalAlignment="Center" Height="18" Margin="0,10,0,9"/>
+        <TextBlock Text="{Binding TovarID}" HorizontalAlignment="Left" FontFamily="Arial" FontSize="16" Grid.Column="1" Width="0"/>
+
+        <TextBlock Text="Название" FontFamily="Arial" FontSize="16" Grid.Row="1" VerticalAlignment="Center" Height="18" Margin="0,9,0,10"/>
+        <TextBox Width="200" Text="{Binding TovarName}" HorizontalAlignment="Left" FontFamily="Arial" FontSize="16" Grid.Row="1" Grid.Column="1" Margin="0,6"/>
+
+        <TextBlock Text="Цена" FontFamily="Arial" FontSize="16" Grid.Row="2" VerticalAlignment="Center" Height="18" Margin="0,10,0,9"/>
+        <TextBox Width="200" Text="{Binding TovarCost}" HorizontalAlignment="Left" FontFamily="Arial" FontSize="16" Grid.Row="2" Grid.Column="1" Margin="0,6"/>
+
+        <TextBlock Text="Мастер" FontFamily="Arial" FontSize="16" Grid.Row="3" VerticalAlignment="Center" Height="18" Margin="0,9,0,10"/>
+        <ComboBox x:Name="AddComboBox" Text="{Binding Masters.MasterName}" SelectedItem="{Binding Masters}" DisplayMemberPath="MasterName" Width="200" HorizontalAlignment="Left" FontFamily="Arial" FontSize="16" Grid.Row="3" Grid.Column="1" Margin="0,1,0,0"/>
+
+        <TextBlock Text="Производитель" FontFamily="Arial" FontSize="16" Grid.Row="5" VerticalAlignment="Center" Height="18" Margin="0,0,0,15"/>
+        <ComboBox x:Name="AddComboBox1" Text="{Binding Manufacturers.ManufacturerName}" SelectedItem="{Binding Manufacturers}" DisplayMemberPath="ManufacturerName" Width="200" HorizontalAlignment="Left" FontFamily="Arial" FontSize="16" Grid.Row="5" Grid.Column="1" Margin="0,0,0,63" Grid.RowSpan="2"/>
+
+        <TextBlock Text="Размер скидки" FontFamily="Arial" FontSize="16" Grid.Row="4" VerticalAlignment="Center" Height="18" Margin="0,0,0,19"/>
+        <TextBox x:Name="Discount" Width="200" Text="{Binding TovarDiscountAmount}" HorizontalAlignment="Left" FontFamily="Arial" FontSize="16" Grid.Row="4" Grid.Column="1" Margin="0,5,0,7"/>
+
+        <TextBlock Text="Описание" FontFamily="Arial" FontSize="16" Grid.Row="6" VerticalAlignment="Center" Height="18" Margin="0,0,0,48"/>
+        <TextBox Width="500" Text="{Binding TovarDescription}" TextWrapping="Wrap" HorizontalAlignment="Left" FontFamily="Arial" FontSize="16" Grid.Row="6" Grid.Column="1" Margin="0,8,0,10"/>
+
+        <TextBlock Text="Изображение" FontFamily="Arial" FontSize="16" Grid.Row="7" VerticalAlignment="Center" Height="18" Margin="0,84,0,83"/>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.Row="7" Grid.Column="1" Width="150" HorizontalAlignment="Left" Margin="0,18,0,17">
+            <Image Width="150" Height="150" Source="{Binding Path=TovarPhoto}"/>
+        </Border>
+
+        <Button x:Name="ChangePhoto" Content="Изменить изображение" Grid.Row="8" FontSize="16" Height="30" Width="200" FontFamily="Arial" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="White" Background="#FF859EDE" Click="ChangePhoto_Click" Margin="0,10,10,10"/>
+        <Button x:Name="Save" Content="Сохранить" Grid.Row="8" FontSize="16" Height="30" Width="200" FontFamily="Arial" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" Background="#FF859EDE" Click="Save_Click" Grid.Column="1" Margin="10,10,0,10"/>
+    </Grid>
+</Window>
+
+
+
+
+
+
+
+
+
+, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+        private Tovar _currentproduct = new Tovar();
+        public AddMaterials(Tovar selectedTovar)
+        {
+            InitializeComponent();
+            DataContext = this;
+            AddComboBox.ItemsSource = RTEntities.GetContext().Masters.ToList();
+            AddComboBox1.ItemsSource = RTEntities.GetContext().Manufacturers.ToList();
+            if (selectedTovar != null)
+                _currentproduct = selectedTovar;
+            DataContext = _currentproduct;
+        }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            StringBuilder errors = new StringBuilder();
+
+            if (string.IsNullOrWhiteSpace(_currentproduct.TovarName))
+                errors.AppendLine("Укажите наименование");
+            if (_currentproduct.TovarCost < 0)
+                errors.AppendLine("Стоимость не может быть отрицательной!");
+            if (_currentproduct.TovarDiscountAmount < 0 || _currentproduct.TovarDiscountAmount > 100)
+                errors.AppendLine("Размер скидки не может быть отрицательным!");
+            if (string.IsNullOrWhiteSpace(_currentproduct.TovarDescription))
+                errors.AppendLine("Укажите описание!");
+
+
+            if (errors.Length > 0)
+                MessageBox.Show(errors.ToString());
+            else
+            {
+                if (_currentproduct.TovarID == 0)
+                    RTEntities.GetContext().Tovar.Add(_currentproduct);
+                try
+                {
+                    RTEntities.GetContext().SaveChanges();
+                    MessageBox.Show("Информация сохранена!");
+                    this.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message.ToString());
+                }
+            }
+        }
+
+        private void ChangePhoto_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog GetImageDialog = new OpenFileDialog();
+            GetImageDialog.Filter = "Файлы изображений: (*.png, *.jpg, *.jpeg)|*.png; *.jpg; *.jpeg";
+            GetImageDialog.InitialDirectory = Environment.GetEnvironmentVariable("/Resources/");
+            if (GetImageDialog.ShowDialog() == true)
+            {
+                _currentproduct.TovarPhoto = GetImageDialog.FileName.Substring(Environment.CurrentDirectory.Length - 10);
+                if (PropertyChanged != null)
+                {
+                    PropertyChanged(this, new PropertyChangedEventArgs("_currentproduct"));
+                }
+            }
+        }
+    }
+}
+        

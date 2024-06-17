@@ -1,0 +1,218 @@
+WindowStartupLocation="CenterScreen"
+        MaxHeight="760" MaxWidth="1160"
+        MinHeight="740" MinWidth="1140"
+        Title="Магазин окон" Height="750" Width="1150" Icon="/Resources/icon.ico" FontFamily="Arial">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="90*"/>
+            <RowDefinition Height="360*"/>
+        </Grid.RowDefinitions>
+        <TextBlock x:Name="usersFaio" Width="500" Height="25" Margin="400,10,0,0" VerticalAlignment="Top"/>
+        <Grid Name="GridUp" Panel.ZIndex="-2" Background="#FF8CD3D6"/>
+        <Button Name="Update1" Content="Заказы" FontSize="15" Height="30" Width="150" FontFamily="Arial" HorizontalAlignment="Center" VerticalAlignment="Bottom" Foreground="White" Background="#FF3AA49F" Click="Update1_Click" Margin="992,0,0,0"/>
+        <Button Name="Update" Content="Обновить" FontSize="15" Height="30" Width="150" FontFamily="Arial" HorizontalAlignment="Center" VerticalAlignment="Bottom" Foreground="White" Background="#FF3AA49F" Click="Update_Click" Margin="809,0,183,0"/>
+        <Image Name="Img" Source="/Resources/logo.png" HorizontalAlignment="Left"/>
+        <Label Content="Магазин окон" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30" FontFamily="Arial" Foreground="White"/>
+        <Button Name="Exit" Content="Выйти" FontSize="15" Height="30" Width="100" FontFamily="Arial" HorizontalAlignment="Right" VerticalAlignment="Top" Foreground="White" Background="#FF3AA49F" Click="Exit_Click"/>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <WrapPanel ItemHeight="30" Orientation="Horizontal">
+                <Label Content="Поиск: " FontFamily="Arial" FontSize="14" VerticalAlignment="Center"/>
+                <TextBox x:Name="SearchFilterTextBox" Height="25" Width="200" FontSize="14" FontFamily="Arial" KeyUp="SearchFilterTextBox_KeyUp"/>
+                <Label Content=" Сортировка: " FontFamily="Arial" FontSize="14" VerticalAlignment="Center"/>
+                <ComboBox x:Name="SortTypeComboBox" Height="25" Width="200" FontSize="14" FontFamily="Arial" ItemsSource="{Binding SortList}" SelectedIndex="0" SelectionChanged="SortFilterComboBox_SelectionChanged"/>
+                <Label Content=" Фильтрация: " FontFamily="Arial" FontSize="14" VerticalAlignment="Center"/>
+                <ComboBox x:Name="DiscountAmountComboBox" Height="25" Width="200" FontSize="14" FontFamily="Arial" ItemsSource="{Binding ManufacturerList}" SelectedIndex="0" DisplayMemberPath="ManufacturerName" SelectionChanged="DiscountAmountComboBox_SelectionChanged"/>
+            </WrapPanel>
+            <ListView x:Name="MaterialsListView" ItemsSource="{Binding MaterialsList}" Grid.Row="1">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1" BorderBrush="Black" Background="{Binding BackgroundColor}">
+                            <Grid Margin="10" HorizontalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Image Name="Img" Source="{Binding Path=TovarPhoto}" Width="100" Height="100"/>
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding TovarName}" FontFamily="Arial" FontSize="14"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Опиcание: " FontFamily="Arial" FontSize="14"/>
+                                        <TextBlock Text="{Binding TovarDescription}" FontFamily="Arial" FontSize="14"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Производитель: " FontFamily="Arial" FontSize="14"/>
+                                        <TextBlock Text="{Binding Manufacturers.ManufacturerName}" FontFamily="Arial" FontSize="14"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Количество на складе " FontFamily="Arial" FontSize="14"/>
+                                        <TextBlock Text="{Binding TovarQuantityInStock}" FontFamily="Arial" FontSize="14"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Цена: " FontFamily="Arial" FontSize="14"/>
+                                        <TextBlock Text="{Binding TovarCost, StringFormat={}{0:N2} руб.}" FontFamily="Arial" Foreground="{Binding CostColor}" FontSize="14" TextDecorations="{Binding CostDeco}"/>
+                                        <TextBlock Text="   " FontFamily="Arial" FontSize="14"/>
+                                        <TextBlock x:Name="CostDesc" Text="{Binding TovarCostDisc, StringFormat={}{0:N2} руб.}" FontFamily="Arial" FontSize="14" Visibility="{Binding CostHid}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Скидка: " FontFamily="Arial" FontSize="14"/>
+                                        <TextBlock Text="{Binding TovarDiscountAmount, StringFormat={}{0} %}" FontFamily="Arial" FontSize="14"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+    </Grid>
+</Window>
+
+
+
+
+
+ public partial class ManagerOkno : Window, INotifyPropertyChanged
+    {
+        public string UserFIOass;
+        public event PropertyChangedEventHandler PropertyChanged;
+        private IEnumerable<Tovar> _MaterialsList;
+        private int SortType = 0;
+        private int ManufacturerFilterID = 0;
+        public List<Manufacturers> ManufacturerList { get; set; }
+        public string[] SortList { get; set; } =
+        {
+            "Без сортировки",
+            "Стоимость по возрастанию",
+            "Стоимость по убыванию",
+            "Кол-во по возрастанию",
+            "Кол-во по убыванию",
+        };
+
+        private void Invalidate(string ComponentName = "MaterialsList")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MaterialsList"));
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(ComponentName));
+        }
+
+        private string SearchFilter = "";
+
+        public IEnumerable<Tovar> MaterialsList
+        {
+            get
+            {
+                var Result = _MaterialsList;
+
+
+                switch (SortType)
+                {
+                    case 0:
+                        Result = KNOEntities.GetContext().Tovar.ToList();
+                        break;
+                    case 1:
+                        Result = KNOEntities.GetContext().Tovar.OrderBy(p => p.TovarCost);
+                        break;
+                    case 2:
+                        Result = KNOEntities.GetContext().Tovar.OrderByDescending(p => p.TovarCost);
+                        break;
+                    case 3:
+                        Result = KNOEntities.GetContext().Tovar.OrderBy(p => p.TovarQuantityInStock);
+                        break;
+                    case 4:
+                        Result = KNOEntities.GetContext().Tovar.OrderByDescending(p => p.TovarQuantityInStock);
+                        break;
+                    
+                }
+                if (SearchFilter != "")
+                    Result = Result.Where(p =>
+                    p.TovarName.IndexOf(SearchFilter, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    p.TovarDescription.IndexOf(SearchFilter, StringComparison.OrdinalIgnoreCase) >= 0);
+
+                if (DiscountAmountComboBox.SelectedIndex == 1)
+                {
+                    Result = Result.Where(i => i.TovarDiscountAmount >= 0 && i.TovarDiscountAmount <= 5.99m);
+                }
+                if (DiscountAmountComboBox.SelectedIndex == 2)
+                {
+                    Result = Result.Where(i => i.TovarDiscountAmount >= 6 && i.TovarDiscountAmount <= 10.99m);
+                }
+                if (DiscountAmountComboBox.SelectedIndex == 3)
+                {
+                    Result = Result.Where(i => i.TovarDiscountAmount >= 11);
+                }
+
+                return Result.Take(100);
+            }
+            set
+            {
+                _MaterialsList = value;
+                Invalidate();
+            }
+        }
+
+        public ManagerOkno(string Faio)
+        {
+            InitializeComponent();
+            DataContext = this;
+            MaterialsList = KNOEntities.GetContext().Tovar.ToList();
+            ManufacturerList = KNOEntities.GetContext().Manufacturers.ToList();
+            ManufacturerList.Clear();
+            ManufacturerList.Insert(0, new Manufacturers { ManufacturerName = "Все диапазоны" });
+            ManufacturerList.Insert(1, new Manufacturers { ManufacturerName = "Скидки от 0% до 5,99%" });
+            ManufacturerList.Insert(2, new Manufacturers { ManufacturerName = "Скидки от 6% до 10,99%" });
+            ManufacturerList.Insert(3, new Manufacturers { ManufacturerName = "Больше 11%" });
+            UserFIOass = Faio;
+            usersFaio.Text = UserFIOass;
+        }
+
+        private void SearchFilterTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            SearchFilter = SearchFilterTextBox.Text;
+            Invalidate();
+        }
+
+        private void SortFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SortType = SortTypeComboBox.SelectedIndex;
+            Invalidate();
+        }
+
+        private void DiscountAmountComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ManufacturerFilterID = DiscountAmountComboBox.SelectedIndex;
+            Invalidate();
+        }
+
+        private void Update_Click(object sender, RoutedEventArgs e)
+        {
+            MaterialsListView.ItemsSource = KNOEntities.GetContext().Tovar.ToList();
+            Invalidate();
+        }
+
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow m = new MainWindow();
+            m.Show();
+            this.Close();
+        }
+
+        private void Update1_Click(object sender, RoutedEventArgs e)
+        {
+            Orderrr m = new Orderrr();
+            m.Show();
+            this.Close();
+
+        }
+    }
+}

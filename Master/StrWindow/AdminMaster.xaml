@@ -1,0 +1,101 @@
+﻿<Window x:Class="Master.StrWindow.AdminMaster"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Master.StrWindow"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        MaxHeight="760" MaxWidth="1160"
+        MinHeight="740" MinWidth="1140"
+        Title="Ремонт ПК" Height="750" Width="1150" Icon="/Resources/icon.ico" FontFamily="Arial">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="90*"/>
+            <RowDefinition Height="360*"/>
+        </Grid.RowDefinitions>
+        <Grid Name="GridUp" Panel.ZIndex="-2" Background="#FF6E8099">
+        </Grid>
+        <TextBlock x:Name="usersFaio" Width="500" Height="25" Margin="400,10,0,0" VerticalAlignment="Top"/>
+        <TextBlock x:Name="chislo1" HorizontalAlignment="Left" Margin="855,40,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="870,40,0,0" TextWrapping="Wrap" Text=" из " VerticalAlignment="Top"/>
+        <TextBlock x:Name="chislo2" HorizontalAlignment="Left" Margin="900,40,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="920,40,0,0" TextWrapping="Wrap" Text="Товаров показано" VerticalAlignment="Top"/>
+        <Image Name="Img" Source="/Resources/logo.png" HorizontalAlignment="Left"/>
+        <Label Content="Ремонт ПК" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30" FontFamily="Arial" Foreground="White" Margin="0,0,0,20"/>
+
+        <Button Name="Update" Content="Обновить" FontSize="15" Height="30" Width="150" FontFamily="Arial" HorizontalAlignment="Center" VerticalAlignment="Bottom" Foreground="White" Background="#FF859EDE" Click="Update_Click" Margin="992,0,0,0"/>
+        <Button Name="Exit" Content="Выйти" FontSize="15" Height="30" Width="100" FontFamily="Arial" HorizontalAlignment="Right" VerticalAlignment="Top" Foreground="White" Background="#FF859EDE" Click="Exit_Click"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1063*"/>
+                <ColumnDefinition Width="80*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <WrapPanel ItemHeight="30" Orientation="Horizontal" Grid.ColumnSpan="2">
+                <Label Content="Поиск: " FontFamily="Arial" FontSize="14" VerticalAlignment="Center"/>
+                <TextBox x:Name="SearchFilterTextBox" Height="25" Width="200" FontSize="14" FontFamily="Arial" KeyUp="SearchFilterTextBox_KeyUp"/>
+                <Label Content=" Сортировка: " FontFamily="Arial" FontSize="14" VerticalAlignment="Center"/>
+                <ComboBox x:Name="SortTypeComboBox" Height="25" Width="200" FontSize="14" FontFamily="Arial" ItemsSource="{Binding SortList}" SelectedIndex="0" SelectionChanged="SortFilterComboBox_SelectionChanged"/>
+                <Label Content=" Фильтрация: " FontFamily="Arial" FontSize="14" VerticalAlignment="Center"/>
+                <ComboBox x:Name="ManufacturerComboBox" Height="25" Width="200" FontSize="14" FontFamily="Arial" ItemsSource="{Binding ManufacturerList}" SelectedIndex="0" DisplayMemberPath="ManufacturerName" SelectionChanged="DiscountAmountComboBox_SelectionChanged"/>
+            </WrapPanel>
+            <Button Name="AddMaterials" Content="Добавить товары" Grid.Row="1" FontSize="15" Height="30" Width="200" FontFamily="Arial" HorizontalAlignment="Left" VerticalAlignment="Bottom" Foreground="White" Background="#FF859EDE" Click="AddMaterials_Click"/>
+            <ListView x:Name="MaterialsListView" ItemsSource="{Binding MaterialsList}" Grid.Row="2" Grid.ColumnSpan="2">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1" BorderBrush="Black" Background="{Binding BackgroundColor}">
+                            <Grid Margin="10" HorizontalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Image Name="Img" Source="{Binding Path=TovarPhoto}" Width="100" Height="100"/>
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Margin="5">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding TovarName}" FontFamily="Arial" FontSize="14"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Опиcание: " FontFamily="Arial" FontSize="14"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding TovarDescription}" FontFamily="Arial" TextWrapping="WrapWithOverflow" Width="700" FontSize="14"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Мастер: " FontFamily="Arial" FontSize="14"/>
+                                        <TextBlock Text="{Binding Manufacturers.ManufacturerName}" FontFamily="Arial" FontSize="14"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Цена: " FontFamily="Arial" FontSize="14"/>
+                                        <TextBlock Text="{Binding TovarCost, StringFormat={}{0:N2} руб.}" FontFamily="Arial" Foreground="{Binding CostColor}" FontSize="14" TextDecorations="{Binding CostDeco}" />
+                                        <TextBlock Text="   " FontFamily="Arial" FontSize="14"/>
+                                        <TextBlock x:Name="CostDesc" Text="{Binding TovarCostDisc, StringFormat={}{0:N2} руб.}" FontFamily="Arial" FontSize="14" Visibility="{Binding CostHid}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Скидка: " FontFamily="Arial" FontSize="14"/>
+                                        <TextBlock Text="{Binding TovarDiscountAmount, StringFormat={}{0} %}" FontFamily="Arial" FontSize="14"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="3">
+                                    <Button Name="Edit" Content="Редактировать" FontSize="15" Height="30" Width="150" FontFamily="Arial" Foreground="White" Background="#FF859EDE" Click="Edit_Click"/>
+                                    <Button Name="Delete" Content="Удалить" FontSize="15" Height="30" Width="150" FontFamily="Arial" Foreground="White" Background="#FF859EDE" Click="Delete_Click"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+    </Grid>
+</Window>

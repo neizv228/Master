@@ -1,0 +1,79 @@
+ WindowStartupLocation="CenterScreen"
+        MaxHeight="460" MaxWidth="810"
+        MinHeight="440" MinWidth="790"
+        Title="Магазин окон" Height="450" Width="800" Icon="/Resources/icon.ico" FontFamily="Arial">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="90*"/>
+            <RowDefinition Height="360*"/>
+        </Grid.RowDefinitions>
+        <Grid Name="GridUp" Panel.ZIndex="-2" Background="#FF8CD3D6"/>
+        <Image Name="Img" Source="/Resources/logo.png" HorizontalAlignment="Left"/>
+        <Label Content="Авторизация" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30" FontFamily="Arial" Foreground="White"/>
+        <Grid Name="GridDown" Grid.Row="1">
+            <Label Content="Логин" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontFamily="Arial" Foreground="#FF3AA49F" Margin="0,0,250,160"/>
+            <Label Content="Пароль" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontFamily="Arial" Foreground="#FF3AA49F" Margin="0,0,250,80"/>
+            <TextBox Name="log" Height="30" Width="200" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Arial" FontSize="20" Margin="60,0,0,160"/>
+            <PasswordBox x:Name="pass" Height="30" Width="200" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Arial" FontSize="20" Margin="60,0,0,80"/>
+            <Button Name="Enter" Content="Войти" FontSize="15" Height="30" Width="150" FontFamily="Arial" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="#FF3AA49F" Click="Enter_Click"/>
+            <Button Name="GuestEnter" Content="Войти как гость" FontSize="15" Height="30" Width="150" FontFamily="Arial" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="#FF3AA49F" Click="GuestEnter_Click" Margin="0,70,0,0"/>
+        </Grid>
+    </Grid>
+</Window>
+
+
+
+
+
+
+
+
+
+ public partial class MainWindow : Window
+    {
+        private List<User> userObj;
+        private string UserFIO;
+        public MainWindow()
+        {
+            InitializeComponent();
+            userObj = KNOEntities.GetContext().User.ToList();
+        }
+
+        private void Enter_Click(object sender, RoutedEventArgs e)
+        {
+            var CurrentUsers = userObj.Where(user => user.UserLogin == log.Text && user.UserPassword == pass.Password).FirstOrDefault();
+
+            if (CurrentUsers != null)
+            {
+                UserFIO = $"Добро пожаловать, {CurrentUsers.UserSurname} {CurrentUsers.UserName} {CurrentUsers.UserPatronymic}!";
+                if (CurrentUsers.UserRole == 1)
+                {
+                    AdminOkno a = new AdminOkno(UserFIO);
+                    a.Show();
+                    this.Close();
+                }
+                else if (CurrentUsers.UserRole == 2)
+                {
+                    ManagerOkno m = new ManagerOkno(UserFIO);
+                    m.Show();
+                    this.Close();
+                }
+                else if (CurrentUsers.UserRole == 3)
+                {
+                    ClientOkno c = new ClientOkno(UserFIO);
+                    c.Show();
+                    this.Close();
+                }
+            }
+            else MessageBox.Show("Вы ввели неправильный логин или пароль!", "Внимание!", MessageBoxButton.OK);
+        }
+
+        private void GuestEnter_Click(object sender, RoutedEventArgs e)
+        {
+            ClientOkno a = new ClientOkno(null);
+            a.Show();
+            this.Close();
+        }
+    }
+}
+

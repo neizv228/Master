@@ -1,0 +1,125 @@
+
+ WindowStartupLocation="CenterScreen"
+        MaxHeight="610" MaxWidth="1010"
+        MinHeight="590" MinWidth="990"
+        Title="Заказы" Height="600" Width="1000" Icon="/Resources/icon.ico">
+    <Grid>
+
+        <ListView x:Name="OrderListView" ItemsSource="{Binding OrderList}" Grid.Row="1">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderThickness="1" BorderBrush="Black">
+                        <Grid Margin="10" HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Vertical" Grid.Column="0" Margin="5">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding OrderName}" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Статус заказа: " FontFamily="Arial" FontSize="14"/>
+                                    <TextBlock Text="{Binding Status.StatusName}" FontFamily="Arial" FontSize="14"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Пункт выдачи: " FontFamily="Arial" FontSize="14"/>
+                                    <TextBlock Text="{Binding OrderPickupPoint}" FontFamily="Arial" FontSize="14"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Дата оформления заказа: " FontFamily="Arial" FontSize="14"/>
+                                    <TextBlock Text="{Binding OrderDate}" FontFamily="Arial" FontSize="14"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Grid.Column="1" VerticalAlignment="Center" Margin="5">
+                                <TextBlock Text="Дата доставки заказа: " FontFamily="Arial" FontSize="14"/>
+                                <TextBlock Text="{Binding OrderDelivaryDate}" FontFamily="Arial" FontSize="14"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Window>
+
+
+
+
+
+
+
+
+ public partial class Orderrr : Window, INotifyPropertyChanged
+    {
+        public Orderrr()
+        {
+            InitializeComponent();
+            DataContext = this;
+            OrderList = KNOEntities.GetContext().Order.ToList();
+            StatusList = KNOEntities.GetContext().Status.ToList();
+            StatusList.Insert(0, new Status { StatusName = "Все статусы" });
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private IEnumerable<Order> _OrderList;
+        private int StatusFilterID = 0;
+        private int SortType = 0;
+        public List<Status> StatusList { get; set; }
+        public string[] SortList { get; set; } =
+        {
+            "Без сортировки",
+            "Название по повзрастанию",
+            "Название по убыванию"
+        };
+
+        private void Invalidate(string ComponentName = "OrderList")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("OrderList"));
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(ComponentName));
+        }
+
+        private string SearchFilter = "";
+        public IEnumerable<Order> OrderList
+        {
+            get
+            {
+                var Result = _OrderList;
+
+                switch (SortType)
+                {
+                    case 0:
+                        Result = KNOEntities.GetContext().Order.ToList();
+                        break;
+                    case 1:
+                        Result = KNOEntities.GetContext().Order.OrderBy(p => p.OrderName);
+                        break;
+                    case 2:
+                        Result = KNOEntities.GetContext().Order.OrderByDescending(p => p.OrderName);
+                        break;
+                }
+                if (SearchFilter != "")
+                    Result = Result.Where(p =>
+                    p.OrderName.IndexOf(SearchFilter, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    p.OrderPickupPoint.IndexOf(SearchFilter, StringComparison.OrdinalIgnoreCase) >= 0);
+
+
+
+                return Result.Take(100);
+            }
+            set
+            {
+                _OrderList = value;
+                Invalidate();
+            }
+        }
+
+
+    }
+}

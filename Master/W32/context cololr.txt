@@ -1,0 +1,64 @@
+
+ private static RTEntities _context;
+        public static RTEntities GetContext()
+        {
+            if (_context == null)
+                _context = new RTEntities();
+            return _context;
+        }
+
+
+
+
+
+public string BackgroundColor
+        {
+            get
+            {
+                if (TovarDiscountAmount >= 10.00m)
+                    return "blue";
+                return "#fff";
+            }
+        }
+
+        public decimal TovarCostDisc
+        {
+            get
+            {
+                var TovarCostD = TovarCost * (100 - TovarDiscountAmount) / 100;
+                return TovarCostD;
+            }
+        }
+
+        public string CostDeco
+        {
+            get
+            {
+                if (TovarDiscountAmount == 0)
+                    return "None";
+                return "Strikethrough";
+
+            }
+        }
+
+        public string CostColor
+        {
+            get
+            {
+                if (TovarDiscountAmount == 0)
+                    return "Black";
+                return "red";
+            }
+        }
+
+        public string CostHid
+        {
+            get
+            {
+                if (TovarDiscountAmount == 0)
+                    return "Hidden";
+                return "Visible";
+            }
+        }
+    }
+}
